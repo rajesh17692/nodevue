@@ -1,26 +1,56 @@
 <template>
-  <div>
-    <h1>Register</h1>
-    <input type="email" name="email" placeholder="Email" v-model="email"><br>
-    <input type="password" name="password" placeholder="Password" v-model="password"><br>
-    <button @click="register">Register</button>
-  </div>
+  <v-layout column>
+    <v-flex xs6 offset-xs3>
+        <panel title="Register">
+            <form
+                    name="node-vue-form"
+                    autocomplete="off"
+            >
+                <v-text-field
+                        label="Email"
+                        v-model="email"
+                ></v-text-field>
+                <br>
+                <v-text-field
+                        type="password"
+                        label="Password"
+                        v-model="password"
+                        autocomplete="new-password"
+                ></v-text-field>
+            </form>
+            <br>
+            <div class="error" v-html="error"/><br>
+            <v-btn class="cyan" @click="register" dark>Register</v-btn>
+        </panel>
+    </v-flex>
+  </v-layout>
 </template>
 <script>
 import AuthenticationService from '../services/AuthenticationService'
+import Panel from '@/components/Panel'
 export default {
   data () {
     return {
-      email: 'abc',
-      password: '111111'
+      email: null,
+      password: null,
+      error: null
     }
+  },
+  components: {
+    Panel
   },
   methods: {
     async register () {
-      await AuthenticationService.register({
-        email: this.email,
-        password: this.password
-      })
+      try {
+        const response = await AuthenticationService.register({
+          email: this.email,
+          password: this.password
+        })
+        this.$store.dispatch('setToken', response.data.token)
+        this.$store.dispatch('setUser', response.data.user)
+      } catch (err) {
+        this.error = err.response.data.error
+      }
     }
   }
 }
@@ -28,5 +58,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.error {
+    color: red;
+}
 </style>
